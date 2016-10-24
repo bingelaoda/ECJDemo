@@ -6,6 +6,42 @@
 
 eval = ec.de.DEEvaluator
 breed = ec.de.DEBreeder
+state		= ec.simple.SimpleEvolutionState
+checkpoint		= false
+checkpoint-prefix	= ec
+checkpoint-modulo	= 1
+generations		= 200
+init		= ec.simple.SimpleInitializer
+finish		= ec.simple.SimpleFinisher
+stat		= ec.simple.SimpleStatistics
+exch		= ec.simple.SimpleExchanger
+pop		= ec.Population
+
+pop.subpops		= 1
+pop.subpop.0		= ec.Subpopulation
+
+pop.subpop.0.size 		= 10
+pop.subpop.0.duplicate-retries 	= 0
+pop.subpop.0.species 		= ec.vector.FloatVectorSpecies
+
+pop.subpop.0.species.fitness 	= ec.simple.SimpleFitness
+pop.subpop.0.species.ind	= ec.vector.FloatVectorIndividual
+
+pop.subpop.0.species.genome-size	= 20
+pop.subpop.0.species.crossover-type	= one
+pop.subpop.0.species.mutation-type	= reset
+pop.subpop.0.species.mutation-prob	= 0.01
+
+pop.subpop.0.species.pipe			= ec.vector.breed.VectorMutationPipeline
+pop.subpop.0.species.pipe.source.0		= ec.vector.breed.VectorCrossoverPipeline
+pop.subpop.0.species.pipe.source.0.source.0	= ec.select.TournamentSelection
+pop.subpop.0.species.pipe.source.0.source.1	= ec.select.TournamentSelection
+
+select.tournament.size		= 2
+
+
+breedthreads=1
+evalthreads=1
 # Other breed choices: ec.de.Best1BinDEBreeder, ec.de.Rand1EitherOrDEBreeder
 
 # DE has certain parameters you must set.  Note that these parameters
@@ -17,9 +53,13 @@ breed.f = 0.1
 # Gene-independent probability of crossover, used only by
 # DEBreeder and Best1BinDEBreeder
 breed.cr = 0.5
+pop.subpop.0.species.min-gene = -2
+pop.subpop.0.species.max-gene = 2
 
 # Scaling factor for noise on F, used only by Best1BinDEBreeder
 breed.f-noise = 0.001
+pop.default-subpop = 1
+pop.subpop.1.size = 1
 
 # Probability of picking the "classic" algorithm versus the alternate, 
 # only ud by Rand1EitherOrDEBreeder
@@ -27,3 +67,5 @@ breed.pf = 0.5
 
 # How often we should attempt to create something within valid bounds
 breed.out-of-bounds-retries = 10
+
+eval.problem		= ec.app.tutorial1.MAX

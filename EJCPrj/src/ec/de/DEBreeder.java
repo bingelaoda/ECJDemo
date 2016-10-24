@@ -17,7 +17,7 @@ import ec.vector.*;
  * "Differential Evolution: A Practical Approach to Global Optimization"
  * by Kenneth Price, Rainer Storn, and Jouni Lampinen.
  *
- * <p>DEBreeder requires that all individuals be DoubleVectorIndividuals.
+ * <p>DEBreeder requires that all individuals be FloatVectorIndividuals.
  *
  * <p>In short, the algorithm is as follows.  For each individual in the population, we produce a child
  * by selecting three (different) individuals, none the original individual, called r0, r1, and r2.
@@ -32,11 +32,11 @@ import ec.vector.*;
  * <p><b>Parameters</b><br>
  * <table>
  * <tr><td valign=top><i>base.</i><tt>f</tt><br>
- * <font size=-1>0.0 &lt;= double &lt;= 1.0 </font></td>
+ * <font size=-1>0.0 &lt;= Float &lt;= 1.0 </font></td>
  * <td valign=top>The "F" mutation scaling factor</td></tr>
  *
  * <tr><td valign=top><i>base.</i><tt>cr</tt><br>
- * <font size=-1>0.0 &lt;= double &lt;= 1.0 </font></td>
+ * <font size=-1>0.0 &lt;= Float &lt;= 1.0 </font></td>
  * <td valign=top>The "Cr" probability of crossing over genes</td></tr>
  * </table>
  *
@@ -46,12 +46,12 @@ import ec.vector.*;
 
 public class DEBreeder extends Breeder
     {
-    public static final double CR_UNSPECIFIED = -1;
+    public static final Float CR_UNSPECIFIED = -1.0f;
 
     /** Scaling factor for mutation */
-    public double F = 0.0;
+    public Float F = 0.0f;
     /** Probability of crossover per gene */
-    public double Cr = CR_UNSPECIFIED;
+    public Float Cr = CR_UNSPECIFIED;
     
     public int retries = 0;
         
@@ -71,12 +71,12 @@ public class DEBreeder extends Breeder
             Cr = CR_UNSPECIFIED;
         else
             {
-            Cr = state.parameters.getDouble(base.push(P_Cr),null,0.0);
+            Cr = state.parameters.getFloat(base.push(P_Cr),null,0.0);
             if ( Cr < 0.0 || Cr > 1.0 )
                 state.output.fatal( "Parameter not found, or its value is outside of [0.0,1.0].", base.push(P_Cr), null );
             }
                         
-        F = state.parameters.getDouble(base.push(P_F),null,0.0);
+        F = state.parameters.getFloat(base.push(P_F),null,0.0);
         if ( F < 0.0 || F > 1.0 )
             state.output.fatal( "Parameter not found, or its value is outside of [0.0,1.0].", base.push(P_F), null );
             
@@ -104,7 +104,7 @@ public class DEBreeder extends Breeder
 
     public Population breedPopulation(EvolutionState state)
         {
-        // double check that we're using DEEvaluator
+        // Float check that we're using DEEvaluator
         if (!(state.evaluator instanceof DEEvaluator))
             state.output.warnOnce("DEEvaluator not used, but DEBreeder used.  This is almost certainly wrong.");
                 
@@ -133,13 +133,13 @@ public class DEBreeder extends Breeder
         }
 
     /** Tests the Individual to see if its values are in range. */
-    public boolean valid(DoubleVectorIndividual ind)
+    public boolean valid(FloatVectorIndividual v)
         {
         //FloatVectorSpecies species = (FloatVectorSpecies)(ind.species);
-        return (ind.isInRange());
+        return (v.isInRange());
         }
 
-    public DoubleVectorIndividual createIndividual(
+    public FloatVectorIndividual createIndividual(
         EvolutionState state,
         int subpop,
         int index,
@@ -147,7 +147,7 @@ public class DEBreeder extends Breeder
         {
         Individual[] inds = state.population.subpops[subpop].individuals;
 
-        DoubleVectorIndividual v = (DoubleVectorIndividual)(state.population.subpops[subpop].species.newIndividual(state, thread));
+        FloatVectorIndividual v = (FloatVectorIndividual)(state.population.subpops[subpop].species.newIndividual(state, thread));
         int retry = -1;
         do
             {
@@ -171,12 +171,12 @@ public class DEBreeder extends Breeder
                 }
             while( r2 == r1 || r2 == r0 || r2 == index );
 
-            DoubleVectorIndividual g0 = (DoubleVectorIndividual)(inds[r0]);
-            DoubleVectorIndividual g1 = (DoubleVectorIndividual)(inds[r1]);
-            DoubleVectorIndividual g2 = (DoubleVectorIndividual)(inds[r2]);
+            FloatVectorIndividual g0 = (FloatVectorIndividual)(inds[r0]);
+            FloatVectorIndividual g1 = (FloatVectorIndividual)(inds[r1]);
+            FloatVectorIndividual g2 = (FloatVectorIndividual)(inds[r2]);
 
             for(int i = 0; i < v.genome.length; i++)
-                v.genome[i] = g0.genome[i] + F * (g1.genome[i] - g2.genome[i]);
+                v.genome[i] = (float) (g0.genome[i] + F * (g1.genome[i] - g2.genome[i]));
             }
         while(!valid(v) && retry < retries);
         if (retry >= retries && !valid(v))  // we reached our maximum
@@ -185,7 +185,7 @@ public class DEBreeder extends Breeder
             v.reset(state, thread);
             }
 
-        return crossover(state, (DoubleVectorIndividual)(inds[index]), v, thread);
+        return crossover(state, (FloatVectorIndividual)(inds[index]), v, thread);
         }
 
 
@@ -194,26 +194,26 @@ public class DEBreeder extends Breeder
         the child.  The crossover guarantees that at least one child value, chosen at random, will
         not be overwritten.  Override this method to perform some other kind of crossover. */
                 
-    public DoubleVectorIndividual crossover(EvolutionState state, DoubleVectorIndividual target, DoubleVectorIndividual child, int thread)
+    public FloatVectorIndividual crossover(EvolutionState state, FloatVectorIndividual target, FloatVectorIndividual v, int thread)
         {
         if (Cr == CR_UNSPECIFIED)
             state.output.warnOnce("Differential Evolution Parameter cr unspecified.  Assuming cr = 0.5");
                         
         // first, hold one value in abeyance
-        int index = state.random[thread].nextInt(child.genome.length);
-        double val = child.genome[index];
+        int index = state.random[thread].nextInt(v.genome.length);
+        Float val = v.genome[index];
                 
         // do the crossover
-        for(int i = 0; i < child.genome.length; i++)
+        for(int i = 0; i < v.genome.length; i++)
             {
-            if (state.random[thread].nextDouble() < Cr)
-                child.genome[i] = target.genome[i];
+            if (state.random[thread].nextFloat() < Cr)
+                v.genome[i] = (float) target.genome[i];
             }
                 
         // reset the one value so it's not just a duplicate copy
-        child.genome[index] = val;
+        v.genome[index] = (float) val;
         
-        return child;
+        return v;
         }
                         
     }
