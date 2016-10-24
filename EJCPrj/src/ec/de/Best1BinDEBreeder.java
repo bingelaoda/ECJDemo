@@ -62,14 +62,14 @@ public class Best1BinDEBreeder extends DEBreeder
         }
         
 
-    public DoubleVectorIndividual createIndividual( final EvolutionState state,
+    public FloatVectorIndividual createIndividual( final EvolutionState state,
         int subpop,
         int index,
         int thread)
         {
         Individual[] inds = state.population.subpops[subpop].individuals;
                 
-        DoubleVectorIndividual v = (DoubleVectorIndividual)(state.population.subpops[subpop].species.newIndividual(state, thread));
+        FloatVectorIndividual v = (FloatVectorIndividual)(state.population.subpops[subpop].species.newIndividual(state, thread));
         int retry = -1;
         do
             {
@@ -98,9 +98,9 @@ public class Best1BinDEBreeder extends DEBreeder
             DoubleVectorIndividual g2 = (DoubleVectorIndividual)(inds[r2]);
 
             for(int i = 0; i < v.genome.length; i++)
-                v.genome[i] = g0.genome[i] + 
+                v.genome[i] = (float) (g0.genome[i] + 
                     (F + state.random[thread].nextDouble() * F_NOISE - (F_NOISE / 2.0)) *
-                    (g1.genome[i] - g2.genome[i]);
+                    (g1.genome[i] - g2.genome[i]));
             }
         while(!valid(v) && retry < retries);
         if (retry >= retries && !valid(v))  // we reached our maximum

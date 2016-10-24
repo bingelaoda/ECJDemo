@@ -194,20 +194,20 @@ public class DEBreeder extends Breeder
         the child.  The crossover guarantees that at least one child value, chosen at random, will
         not be overwritten.  Override this method to perform some other kind of crossover. */
                 
-    public FloatVectorIndividual crossover(EvolutionState state, FloatVectorIndividual target, FloatVectorIndividual v, int thread)
+    public FloatVectorIndividual crossover(EvolutionState state, FloatVectorIndividual inds, FloatVectorIndividual v, int thread)
         {
         if (Cr == CR_UNSPECIFIED)
             state.output.warnOnce("Differential Evolution Parameter cr unspecified.  Assuming cr = 0.5");
                         
         // first, hold one value in abeyance
         int index = state.random[thread].nextInt(v.genome.length);
-        Float val = v.genome[index];
+        Float val = (float) v.genome[index];
                 
         // do the crossover
         for(int i = 0; i < v.genome.length; i++)
             {
             if (state.random[thread].nextFloat() < Cr)
-                v.genome[i] = (float) target.genome[i];
+                v.genome[i] = (float) inds.genome[i];
             }
                 
         // reset the one value so it's not just a duplicate copy
